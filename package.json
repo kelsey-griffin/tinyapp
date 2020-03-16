@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/kelsey-griffin/tinyapp/issues"
   },
-  "homepage": "https://github.com/kelsey-griffin/tinyapp#readme"
+  "homepage": "https://github.com/kelsey-griffin/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
