@@ -47,6 +47,11 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}!`);
 });
