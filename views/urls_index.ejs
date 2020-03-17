@@ -24,15 +24,14 @@
           <tr>
             <td><%= url %></td>
             <td><%= urls[url] %></td>
-            <td><form method="POST" action="/urls/9sm5xK/delete"><button type="delete">Delete</button></form></td>
-            
+            <td><a class="btn btn-primary" href="/urls/<%=url%>" role="button">Update</a></td>
+            <td><form method="POST" action="/urls/<%=url%>/delete"><button class="btn btn-primary" type="delete">Delete</button></form></td>
           </tr>
         <% } %>
       </tbody>
     </table>
     <tbody>
-      Shorten a new Link:
-      <a class="btn btn-primary" href="/urls/new" role="button">Here</a>   
+      <a class="btn btn-primary" href="/urls/new" role="button">Shorten a New Link</a>   
     </tbody>
   </main>
   <!-- Bootstrap JS -->
