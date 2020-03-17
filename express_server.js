@@ -12,24 +12,14 @@ const urlDatabase = {
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
 let a = 0 //in this scope (global), value of a  is tracked
-app.get("/set", (req, res) => {
-   a += 1;
-  res.send(`a = ${a}`);
- });
- 
- app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
- });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+app.get("/urls", (req, res) => {
+  let templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Server listening on port ${PORT}!`);
 });
