@@ -10,7 +10,15 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.send("Hello! This is my Tiny App");
+});
+
+app.get("/urls/:shortURL", (req, res) => {
+  let templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  }
+  res.render("urls_show", templateVars);
 });
 
 app.get("/urls", (req, res) => {
