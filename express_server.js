@@ -16,15 +16,22 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello! This is my Tiny App");
-});
-
-app.post("/urls", (req, res) => {
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect("/urls");
 });
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL]
+  res.redirect(longURL);
+});
+
+app.post("/urls", (req, res) => {
+  let shortened = generateRandomString()
+  urlDatabase[shortened] = req.body.longURL
+  res.redirect(`/urls/${shortened}`);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
