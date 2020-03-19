@@ -14,6 +14,11 @@ const generateRandomString = () => {
 
 //default users database
 const users = { 
+  "abc": {
+    id: "abc", 
+    email: "a@a.com", 
+    password: "1234"
+  },
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
@@ -84,6 +89,16 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//render login page
+app.get("/login", (req, res) => {
+  let userID = req.cookies['user_id']
+  let templateVars = {   
+    user: users[userID],
+    urls: urlDatabase 
+  };
+  res.render("urls_login", templateVars)
+});
+
 //render a registration page with users database and urls database
 app.get("/register", (req, res) => {
   let userID = req.cookies['user_id']
@@ -139,7 +154,7 @@ app.post("/login", (req, res) => {
 
 //when logout button is pressed, clear username cookie and redirect to /urls page
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_ID");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -147,6 +162,8 @@ app.post("/logout", (req, res) => {
   //user id  added as a cookie 
 app.post("/register", (req, res) => {
   let userID = generateRandomString();
+  
+  if (!(req.body.email || req.body.password)) res.status(400).send("Please enter an email and password.");
   if (findUser(req.body.email)) res.status(400).send("This email is already registered!")
   users[userID] = {
     id: userID,
