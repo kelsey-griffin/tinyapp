@@ -31,6 +31,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//use this function to see if the user exists 
+  //will return the matching user object if so
+  const findUser = (emailEntered) => {
+    for (x in users) {
+      if (users[x].email === emailEntered) return users[x];
+    }
+  };
+
+///////////////////////
+//begin routes
+//////////////////////
+
 //root page
 app.get("/", (req, res) => {
   res.send("Hello, Tiny App User.")
@@ -102,37 +114,26 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-//on login page, create cookie for username/email (?) and password (?) 
-  //redirect to /urls when form submitted
-
-//*******************//
-//
-//I think this for..loop needs to be in the header.
-//Just need to send the cookie with template vars? 
-//   
+//when login button is pressed on header, validate email and password
+  //if valid, continue to /urls, logged in. otherwise return error. 
 app.post("/login", (req, res) => {
   //save the email and password that were entered into variables
   let emailAttempt = req.body.email;
   let passwordAttempt = req.body.password;
-
   // console.log(emailAttempt, passwordAttempt)
 
-  //use this function to see if the user exists and if the password was correct
-  //will return the matching user object if so
-  const findUser = (emailEnterd, passwordEntered) => {
-    for (x in users) {
-      if (users[x].email === emailEnterd && users[x].password === passwordEntered) {
-        return users[x];
-      }
-    }
-  };
-
-  if (findUser(emailAttempt, passwordAttempt)) {
-    const user = findUser(emailAttempt, passwordAttempt);
+  //if either email or password form is empty, send a 400 error with message. 
+  if (!(emailAttempt || passwordAttempt)) res.status(400).send("Please enter an email and password.");
+  
+  //if the user is found, set cookie to that user and render urls page with it
+    //if email not found in list or password doesn't match, error message sent.
+  if (findUser(emailAttempt)) {
+    //check password....
+    const user = findUser(emailAttempt);
     res.cookie("user_id", user.id)
     res.render("urls_index", { user, urls: urlDatabase });
-  } else {
-    res.send("Error: Incorrect Email or Password.")
+  } else { //no user found
+    res.status(400).send("Incorrect Email or Password. If you are new here, please register first!");
   }
 });
 
@@ -146,6 +147,7 @@ app.post("/logout", (req, res) => {
   //user id  added as a cookie 
 app.post("/register", (req, res) => {
   let userID = generateRandomString();
+  if (findUser(req.body.email)) res.status(400).send("This email is already registered!")
   users[userID] = {
     id: userID,
     email: req.body.email,
