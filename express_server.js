@@ -12,68 +12,145 @@ const generateRandomString = () => {
   return Math.random().toString(36).substring(7);
 };
 
+//default users database
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+};
+//default URL database
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+//root page
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  res.send("Hello, Tiny App User.")
+  // res.redirect("/register");
 });
 
+//send user database to urls/new for when you want to shorten a new link
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    username: req.cookies["username"],
-  };
+  let userID = req.cookies['user_id']
+  let templateVars = { user: users[userID] };
   res.render("urls_new", templateVars);
 });
 
+//when you click on the short URL link, redirect to corresponding long URL
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
-app.post("/urls", (req, res) => {
-  let shortened = generateRandomString();
-  urlDatabase[shortened] = req.body.longURL;
-  res.redirect(`/urls/${shortened}`);
-});
-
+//page shows shortened link, original long link, 
+  //and option to update long URL assoc. with short URL
 app.get("/urls/:shortURL", (req, res) => {
+  let userID = req.cookies['user_id']
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[userID],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };
   res.render("urls_show", templateVars);
 });
 
+//render index page with users database and urls database
 app.get("/urls", (req, res) => {
+  let userID = req.cookies['user_id']
   let templateVars = {   
-    username: req.cookies["username"],
+    user: users[userID],
     urls: urlDatabase 
   };
   res.render("urls_index", templateVars);
 });
 
+//render a registration page with users database and urls database
+app.get("/register", (req, res) => {
+  let userID = req.cookies['user_id']
+  let templateVars = {   
+    user: users[userID],
+    urls: urlDatabase 
+  };
+  res.render("urls_register", templateVars);
+});
+
+//add new shortened URL and corresponding long URL to URL database
+  //redirect to short URL specific page
+  app.post("/urls", (req, res) => {
+    let shortened = generateRandomString();
+    urlDatabase[shortened] = req.body.longURL;
+    res.redirect(`/urls/${shortened}`);
+  });
+
+//delete the specified URL pair, redirect to /urls 
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
+//update url pair with new long URL as entered by client
 app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect("/urls");
 });
 
+//on login page, create cookie for username/email (?) and password (?) 
+  //redirect to /urls when form submitted
+
+//*******************//
+//
+//I think this for..loop needs to be in the header.
+//Just need to send the cookie with template vars? 
+//   
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username)
+  let userID = req.cookies['user_id'];
+  if (userID) {
+    for (user in users) {
+      if (user === userID.id) { //if the cookie ID (userID.id) matches an ID in our database (user)
+        if(users[user].password === userID.password) { //if the cookie password (userID.password) matches password for that ID in database (users[user].password)
+          //Yay - successful login
+          //redirect to /urls
+          let userID = req.cookies['user_id']
+          let templateVars = {   
+            user: users[userID],
+            urls: urlDatabase 
+            };
+          res.render("urls_register", templateVars);
+        }
+      } 
+      // console.log(" user: ", user, "\n userID", userID, "\n users[userID].email: ", users[user].email)
+    }
+  } else {
+
+  }
+  // res.redirect("/register") 
+});
+
+//when logout button is pressed, clear username cookie and redirect to /urls page
+app.post("/logout", (req, res) => {
+  res.clearCookie("userID");
   res.redirect("/urls");
 });
 
-app.post("/logout", (req, res) => {
-  res.clearCookie("username");
-  res.redirect("/urls");
+//on /register, when register button is pressed, user id, password, and email are added to users db
+  //user id  added as a cookie 
+app.post("/register", (req, res) => {
+  let userID = generateRandomString();
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie("user_id", users[userID]);
+  res.redirect("/urls")
 });
 
 app.listen(PORT, () => {
