@@ -111,32 +111,34 @@ app.post("/urls/:shortURL", (req, res) => {
 //Just need to send the cookie with template vars? 
 //   
 app.post("/login", (req, res) => {
-  let userID = req.cookies['user_id'];
-  if (userID) {
-    for (user in users) {
-      if (user === userID.id) { //if the cookie ID (userID.id) matches an ID in our database (user)
-        if(users[user].password === userID.password) { //if the cookie password (userID.password) matches password for that ID in database (users[user].password)
-          //Yay - successful login
-          //redirect to /urls
-          let userID = req.cookies['user_id']
-          let templateVars = {   
-            user: users[userID],
-            urls: urlDatabase 
-            };
-          res.render("urls_register", templateVars);
-        }
-      } 
-      // console.log(" user: ", user, "\n userID", userID, "\n users[userID].email: ", users[user].email)
-    }
-  } else {
+  //save the email and password that were entered into variables
+  let emailAttempt = req.body.email;
+  let passwordAttempt = req.body.password;
 
+  // console.log(emailAttempt, passwordAttempt)
+
+  //use this function to see if the user exists and if the password was correct
+  //will return the matching user object if so
+  const findUser = (emailEnterd, passwordEntered) => {
+    for (x in users) {
+      if (users[x].email === emailEnterd && users[x].password === passwordEntered) {
+        return users[x];
+      }
+    }
+  };
+
+  if (findUser(emailAttempt, passwordAttempt)) {
+    const user = findUser(emailAttempt, passwordAttempt);
+    res.cookie("user_id", user.id)
+    res.render("urls_index", { user, urls: urlDatabase });
+  } else {
+    res.send("Error: Incorrect Email or Password.")
   }
-  // res.redirect("/register") 
 });
 
 //when logout button is pressed, clear username cookie and redirect to /urls page
 app.post("/logout", (req, res) => {
-  res.clearCookie("userID");
+  res.clearCookie("user_ID");
   res.redirect("/urls");
 });
 
