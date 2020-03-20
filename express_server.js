@@ -2,10 +2,10 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-// const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session')
 
+const { getUserByEmail, urlsForUser, generateRandomString } = require('./helpers')
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -14,10 +14,6 @@ app.use(cookieSession({
   name: 'session',
   keys: ['user_id'],
 }));
-
-const generateRandomString = () => {
-  return Math.random().toString(36).substring(7);
-};
 
 //default users database
 const users = {
@@ -41,23 +37,6 @@ const users = {
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "user2RandomID" },
   "9sm5xK": { longURL: "http://www.google.com", userID: "abc" }
-};
-
-// use this function to see if the user exists
-// will return the matching user object if so
-const getUserByEmail = function(email, database) {
-  for (let x in database) {
-    if (database[x].email === email) return database[x];
-  }
-};
-
-//function to return urlDatabase object with only urls made by a specified user
-const urlsForUser = (userID) => {
-  let filteredObj = urlDatabase;
-  Object.keys(filteredObj).forEach(key => {
-    if (filteredObj[key].userID !== userID) delete filteredObj[key];
-  });
-  return filteredObj;
 };
 
 ///////////////////////
@@ -93,17 +72,20 @@ app.get("/urls/:shortURL", (req, res) => {
   let userID = req.session.user_id;
   //if the user is logged in and the shortURL is attributed to the user, render the page. Otherwise, redirect.
   let shortURL = req.params.shortURL;
-  if (userID && urlDatabase[shortURL].userID === userID) {
-    let templateVars = {
-      user: users[userID],
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL
-    };
-    res.render("urls_show", templateVars);
-    return;
-  } else if (userID && urlDatabase[shortURL].userID !== userID) {
-    res.status(403).send("Access Denied: Private URL");
-    return;
+
+  if (userID) {
+    if (urlDatabase[shortURL] && urlDatabase[shortURL].userID === userID) {
+      let templateVars = {
+        user: users[userID],
+        shortURL,
+        longURL: urlDatabase[req.params.shortURL].longURL
+      };
+      res.render("urls_show", templateVars);
+      return;
+    } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
+      res.status(403).send("Access Denied: Private URL");
+      return;
+    } 
   }
   res.redirect("/login");
 });
@@ -113,7 +95,7 @@ app.get("/urls", (req, res) => {
   let userID = req.session.user_id;
   //if logged in (i.e. there is a user_id cookie) continue to urls site
   if (userID) {
-    let filteredURLs = urlsForUser(userID) //use function to filter the urls by user
+    let filteredURLs = urlsForUser(userID, urlDatabase) //use function to filter the urls by user
     let templateVars = {
       user: users[userID],
       urls: filteredURLs,
@@ -162,7 +144,7 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   let userID = req.session.user_id;
 
-  if (userID && Object.keys(urlsForUser(userID)).includes(req.params.shortURL)) { 
+  if (userID && Object.keys(urlsForUser(userID, urlDatabase)).includes(req.params.shortURL)) { 
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
     return;
@@ -174,7 +156,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   let userID = req.session.user_id;
 
-  if (userID && Object.keys(urlsForUser(userID)).includes(req.params.shortURL)) {
+  if (userID && Object.keys(urlsForUser(userID, urlDatabase)).includes(req.params.shortURL)) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
     return;
@@ -233,6 +215,7 @@ app.post("/register", (req, res) => {
     password: hashedPassword,
   };
   res.redirect("/login");
+  return;
 });
 
 app.listen(PORT, () => {
