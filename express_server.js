@@ -2,12 +2,18 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
+const cookieSession = require('cookie-session')
+
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['user_id'],
+}));
 
 const generateRandomString = () => {
   return Math.random().toString(36).substring(7);
@@ -65,7 +71,7 @@ app.get("/", (req, res) => {
 
 //send user database to urls/new for when you want to shorten a new link
 app.get("/urls/new", (req, res) => {
-  let userID = req.cookies['user_id'];
+  let userID = req.session.user_id;
   if (findUser(users[userID].email)) {
     let templateVars = { user: users[userID], urls: urlDatabase };
     res.render("urls_new", templateVars);
@@ -82,7 +88,7 @@ app.get("/u/:shortURL", (req, res) => {
 //page shows shortened link, original long link,
 //and option to update long URL assoc. with short URL
 app.get("/urls/:shortURL", (req, res) => {
-  let userID = req.cookies['user_id'];
+  let userID = req.session.user_id;
   //if the user is logged in and the shortURL is attributed to the user, render the page. Otherwise, redirect.
   let shortURL = req.params.shortURL;
   if (userID && urlDatabase[shortURL].userID === userID) {
@@ -102,7 +108,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //render index page with users database and urls database
 app.get("/urls", (req, res) => {
-  let userID = req.cookies['user_id'];
+  let userID = req.session.user_id;
   //if logged in (i.e. there is a user_id cookie) continue to urls site
   if (userID) {
     let filteredURLs = urlsForUser(userID) //use function to filter the urls by user
@@ -119,7 +125,7 @@ app.get("/urls", (req, res) => {
 
 //render login page
 app.get("/login", (req, res) => {
-  let userID = req.cookies['user_id'];
+  let userID = req.session.user_id;
   let templateVars = {
     user: users[userID],
     urls: urlDatabase
@@ -129,7 +135,7 @@ app.get("/login", (req, res) => {
 
 //render a registration page with users database and urls database
 app.get("/register", (req, res) => {
-  let userID = req.cookies['user_id'];
+  let userID = req.session.user_id;
   let templateVars = {
     user: users[userID],
     urls: urlDatabase
@@ -141,7 +147,7 @@ app.get("/register", (req, res) => {
 //redirect to short URL specific page
 app.post("/urls", (req, res) => {
   let shortened = generateRandomString();
-  let userID = req.cookies['user_id'];
+  let userID = req.session.user_id;
 
   urlDatabase[shortened] = {
     longURL: req.body.longURL,
@@ -152,7 +158,7 @@ app.post("/urls", (req, res) => {
 
 //if logged in and specified url is attributed to this userID, delete the specified URL pair, redirect to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let userID = req.cookies['user_id'];
+  let userID = req.session.user_id;
 
   if (userID && Object.keys(urlsForUser(userID)).includes(req.params.shortURL)) { 
     delete urlDatabase[req.params.shortURL];
@@ -164,7 +170,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //update url pair with new long URL as entered by client
 app.post("/urls/:shortURL", (req, res) => {
-  let userID = req.cookies['user_id'];
+  let userID = req.session.user_id;
 
   if (userID && Object.keys(urlsForUser(userID)).includes(req.params.shortURL)) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
@@ -186,12 +192,15 @@ app.post("/login", (req, res) => {
   
   //if the user is found, set cookie to that user and render urls page with it
   //if email not found in list or password doesn't match, error message sent.
+  const user = findUser(emailAttempt);
+    
   if (findUser(emailAttempt)) {
     const user = findUser(emailAttempt);
     
-    if (bcrypt.compareSync(passwordAttempt, hashedPassword)) {
-      res.cookie("user_id", user.id);
+    if (bcrypt.compareSync(passwordAttempt, user.password)) {
+      req.session.user_id = user.id;
       res.redirect("/urls");
+      return;
     }
   }
   //if the user isn't found or the password doesn't match
@@ -201,7 +210,7 @@ app.post("/login", (req, res) => {
 
 //when logout button is pressed, clear user_id cookie and redirect to /urls page
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls");
 });
 
@@ -219,7 +228,7 @@ app.post("/register", (req, res) => {
   users[userID] = {
     id: userID,
     email: req.body.email,
-    password,
+    password: hashedPassword,
   };
   res.redirect("/login");
 });
