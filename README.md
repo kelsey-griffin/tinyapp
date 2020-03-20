@@ -18,5 +18,24 @@ Users register with an email and password, which is hashed to ensure security. T
 You must be registered and logged in to have fun on TinyApp.
 Users can only access, edit, and delete shortened URLs that are attributed to their account.
 
+#### File Paths
+- README.md
+- package.json
+- package-lock.json
+- express-server.js (Contains all route handlers)
+- helpers.js (Helper functions exported from this file)
+- views
+ |- partials
+   |_ _header.ejs
+ |- urls_index.ejs
+ |- urls_login.ejs
+ |- urls_new.ejs
+ |- urls_register.ejs
+ |_ urls_show.ejs
+- tests
+ |_ helpersTest.js (Mocha Chai test for helper functions)
+
+
+
 Enjoy!
 
