@@ -13,6 +13,8 @@ Want to log out and come back later - no problem! Your short URLs will be saved 
 Start server with `$ npm start` from the tinyapp directory in your terminal.
 Navigate to localhost:8080 in your browser, where you will be greeted with a Welcome page and links to register or login. 
 
+Users register with an email and password, which is hashed to ensure security. The user is given a unique ID which is stored in a cookie session. 
+
 You must be registered and logged in to have fun on TinyApp.
 Users can only access, edit, and delete shortened URLs that are attributed to their account.
 
