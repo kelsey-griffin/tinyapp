@@ -45,14 +45,14 @@ const urlDatabase = {
 
 //root page
 app.get("/", (req, res) => {
-  res.send("Hello, Tiny App User.");
+  res.render("urls_login");
 });
 
 //send user database to urls/new for when you want to shorten a new link
 app.get("/urls/new", (req, res) => {
   let userID = req.session.user_id;
 
-  if (users[userID].email) {
+  if (userID && users[userID].email) {
     let templateVars = { user: users[userID], urls: urlDatabase };
     res.render("urls_new", templateVars);
     return;
@@ -83,11 +83,13 @@ app.get("/urls/:shortURL", (req, res) => {
       res.render("urls_show", templateVars);
       return;
     } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
-      res.status(403).send("Access Denied: Private URL");
+      res.render("urls_error", { reason: "wrong user"});
       return;
     }
+    res.render("urls_error", { reason: "no such shortURL"});
+    return;
   }
-  res.redirect("/login");
+  res.render("urls_error", { reason: "not logged in"});
 });
 
 //render index page with users database and urls database
@@ -104,7 +106,7 @@ app.get("/urls", (req, res) => {
     return;
   }
   //if not logged in, redirect to the login page
-  res.redirect("/login");
+  res.render("urls_error", {reason: "not logged in"});
 });
 
 //render login page
@@ -124,6 +126,7 @@ app.get("/register", (req, res) => {
     user: users[userID],
     urls: urlDatabase
   };
+  req.session = null;
   res.render("urls_register", templateVars);
 });
 
@@ -149,7 +152,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     res.redirect("/urls");
     return;
   }
-  res.status(403).redirect("/urls");
+  res.render("urls_error", { reason: "wrong user"});
 });
 
 //update url pair with new long URL as entered by client
@@ -161,7 +164,7 @@ app.post("/urls/:shortURL", (req, res) => {
     res.redirect("/urls");
     return;
   }
-  res.status(403).redirect("/urls");
+  res.render("urls_error", { reason: "wrong user" });
 });
 
 //when login button is pressed on header, validate email and password
@@ -171,8 +174,11 @@ app.post("/login", (req, res) => {
   let emailAttempt = req.body.email;
   let passwordAttempt = req.body.password;
 
-  //if either email or password form is empty, send a 400 error with message.
-  if (!(emailAttempt || passwordAttempt)) res.status(400).send("Please enter an email and password.");
+  //if either email or password form is empty, redirect to error page.
+  if (!(emailAttempt || passwordAttempt)) {
+    res.render("urls_error", { reason: "empty field" });
+    return;
+  }
   
   //if the user is found, set cookie to that user and render urls page with it
   //if email not found in list or password doesn't match, error message sent.
@@ -188,23 +194,22 @@ app.post("/login", (req, res) => {
   }
   //if the user isn't found or the password doesn't match
   //will return error for default users in { users } because passwords are hardcoded, not hashed.
-  res.status(403).send("Incorrect Email or Password. If you are new here, please register first!");
-
+  res.render("urls_error", { reason: "bad login" });
 });
 
 //when logout button is pressed, clear user_id cookie and redirect to /urls page
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
-//on /register, when register button is pressed, user id, password, and email are added to users db
+//add user id, password (hashed), and email to users db
 //user id  added as a cookie
 app.post("/register", (req, res) => {
   let userID = generateRandomString();
   
-  if (!(req.body.email || req.body.password)) res.status(403).send("Please enter an email and password.");
-  if (getUserByEmail(req.body.email, users)) res.status(403).send("This email is already registered!");
+  if (!(req.body.email || req.body.password)) res.render("urls_error", { reason: "empty field" });
+  if (getUserByEmail(req.body.email, users)) res.render("urls_error", { reason: "already registered" });
   
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
