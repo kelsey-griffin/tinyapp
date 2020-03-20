@@ -43,11 +43,11 @@ const urlDatabase = {
   "9sm5xK": { longURL: "http://www.google.com", userID: "abc" }
 };
 
-//use this function to see if the user exists
-//will return the matching user object if so
-const findUser = (emailEntered) => {
-  for (let x in users) {
-    if (users[x].email === emailEntered) return users[x];
+// use this function to see if the user exists
+// will return the matching user object if so
+const getUserByEmail = function(email, database) {
+  for (let x in database) {
+    if (database[x].email === email) return database[x];
   }
 };
 
@@ -72,9 +72,11 @@ app.get("/", (req, res) => {
 //send user database to urls/new for when you want to shorten a new link
 app.get("/urls/new", (req, res) => {
   let userID = req.session.user_id;
-  if (findUser(users[userID].email)) {
+
+  if (users[userID].email) {
     let templateVars = { user: users[userID], urls: urlDatabase };
     res.render("urls_new", templateVars);
+    return;
   }
   res.redirect("/login");
 });
@@ -192,11 +194,10 @@ app.post("/login", (req, res) => {
   
   //if the user is found, set cookie to that user and render urls page with it
   //if email not found in list or password doesn't match, error message sent.
-  const user = findUser(emailAttempt);
-    
-  if (findUser(emailAttempt)) {
-    const user = findUser(emailAttempt);
-    
+
+  if (getUserByEmail(emailAttempt, users)) {
+    let user = getUserByEmail(emailAttempt, users);
+
     if (bcrypt.compareSync(passwordAttempt, user.password)) {
       req.session.user_id = user.id;
       res.redirect("/urls");
@@ -204,6 +205,7 @@ app.post("/login", (req, res) => {
     }
   }
   //if the user isn't found or the password doesn't match
+  //will return error for default users in { users } because passwords are hardcoded, not hashed.
   res.status(403).send("Incorrect Email or Password. If you are new here, please register first!");
 
 });
@@ -220,7 +222,7 @@ app.post("/register", (req, res) => {
   let userID = generateRandomString();
   
   if (!(req.body.email || req.body.password)) res.status(403).send("Please enter an email and password.");
-  if (findUser(req.body.email)) res.status(403).send("This email is already registered!");
+  if (getUserByEmail(req.body.email, users)) res.status(403).send("This email is already registered!");
   
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
