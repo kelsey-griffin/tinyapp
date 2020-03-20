@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <title>Error</title>
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-md navbar-dark bg-info">
+      <a class="navbar-brand" href="/urls">TinyApp</a>
+    </nav>
+  </header>
+  <p class="text-center"><strong>Something went wrong...</strong></p>
+  <% if (reason === "not logged in") { %>
+    <div class="text-center">
+      Oops! Looks like you're not signed up yet! Login or Register Below :D
+      <div>
+        <a href="/login" class="btn btn-info" role="button"> Login  </a> 
+        <a href="/register" class="btn btn-info" role="button">Register</a>
+      </div>
+    </div>
+  <% } else if (reason === "wrong user") { %>
+    <div class="text-center">
+      Oops! Looks like you're trying to view a shortURL that doesn't belong to you. 
+      <div>
+        <a href="/urls" class="btn btn-info" role="button"> Back to my URLs  </a> 
+      </div>
+    </div>
+  <% } else if (reason === "no such shortURL") { %>
+    <div class="text-center">
+      Oops! Looks like you're trying to view a shortURL that doesn't exist. 
+      <div>
+        <a href="/urls" class="btn btn-info" role="button"> Back to my URLs  </a> 
+        <a href="/urls/new" class="btn btn-info" role="button"> New Short URLs </a> 
+      </div>
+    </div>
+  <% } else if (reason === "wrong user") { %>
+    <div class="text-center">
+      Oops! Looks like you're trying to view a shortURL that doesn't belong to you. 
+      <div>
+        <a href="/urls" class="btn btn-info" role="button"> Back to my URLs  </a> 
+      </div>
+    </div>
+  <% } else if (reason === "empty field") { %>
+    <div class="text-center">
+      Oops! Looks like you forgot to fill out one or more of the fields. 
+      <div>
+        <a href="/login" class="btn btn-info" role="button"> Login  </a>
+        <a href="/register" class="btn btn-info" role="button"> Register  </a>
+      </div>
+    </div>
+  <% } else if (reason === "bad login") { %>
+    <div class="text-center">
+      Oops! We don't recognize that email / password combo. <br>Feel free to try again or if you're new here, register! 
+      <div>
+        <a href="/login" class="btn btn-info" role="button"> Login </a> 
+        <a href="/register" class="btn btn-info" role="button"> Register </a> 
+      </div>
+    </div>
+  <% } else if (reason === "already registered") { %>
+    <div class="text-center">
+      Oops! This email is already registered.
+      <div>
+        <a href="/login" class="btn btn-info" role="button"> Login </a> 
+        <a href="/register" class="btn btn-info" role="button"> Register </a> 
+      </div>
+    </div>
+  <% } %>
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>  
+  </body>
+</html>
