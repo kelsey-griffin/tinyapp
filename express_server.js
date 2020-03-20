@@ -3,9 +3,9 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 
-const { getUserByEmail, urlsForUser, generateRandomString } = require('./helpers')
+const { getUserByEmail, urlsForUser, generateRandomString } = require('./helpers');
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -85,7 +85,7 @@ app.get("/urls/:shortURL", (req, res) => {
     } else if (urlDatabase[shortURL] && urlDatabase[shortURL].userID !== userID) {
       res.status(403).send("Access Denied: Private URL");
       return;
-    } 
+    }
   }
   res.redirect("/login");
 });
@@ -95,7 +95,7 @@ app.get("/urls", (req, res) => {
   let userID = req.session.user_id;
   //if logged in (i.e. there is a user_id cookie) continue to urls site
   if (userID) {
-    let filteredURLs = urlsForUser(userID, urlDatabase) //use function to filter the urls by user
+    let filteredURLs = urlsForUser(userID, urlDatabase); //use function to filter the urls by user
     let templateVars = {
       user: users[userID],
       urls: filteredURLs,
@@ -144,11 +144,11 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   let userID = req.session.user_id;
 
-  if (userID && Object.keys(urlsForUser(userID, urlDatabase)).includes(req.params.shortURL)) { 
+  if (userID && Object.keys(urlsForUser(userID, urlDatabase)).includes(req.params.shortURL)) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
     return;
-  };
+  }
   res.status(403).redirect("/urls");
 });
 

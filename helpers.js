@@ -20,8 +20,8 @@ const urlsForUser = (id, database) => {
   return filteredObj;
 };
 
-module.exports = { 
+module.exports = {
   getUserByEmail,
   urlsForUser,
   generateRandomString
-}
+};
