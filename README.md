@@ -1,5 +1,5 @@
 # TinyApp
-## Authored by: Kelsey Griffin
+##### Authored by: Kelsey Griffin ( @kelsey-griffin )
 
 ### A full stack web app built with Node and Express that allows users to shorten long URLs (à la bit.ly)!
 
@@ -25,15 +25,15 @@ Users can only access, edit, and delete shortened URLs that are attributed to th
 - express-server.js (Contains all route handlers)
 - helpers.js (Helper functions exported from this file)
 - views
- |- partials
-   |_ _header.ejs
- |- urls_index.ejs
- |- urls_login.ejs
- |- urls_new.ejs
- |- urls_register.ejs
- |_ urls_show.ejs
+ - partials
+   - _header.ejs
+ - urls_index.ejs
+ - urls_login.ejs
+ - urls_new.ejs
+ - urls_register.ejs
+ - urls_show.ejs
 - tests
- |_ helpersTest.js (Mocha Chai test for helper functions)
+ - helpersTest.js (Mocha Chai test for helper functions)
 
 
 
