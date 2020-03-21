@@ -1,17 +1,16 @@
 # TinyApp
 ##### Authored by: Kelsey Griffin ( @kelsey-griffin )
 
-### A full stack web app built with Node and Express that allows users to shorten long URLs (à la bit.ly)!(
+### A full stack web app built with Node and Express allowing users to shorten long URLs!
 
 Welcome to TinyApp - here you can shorten a URL into a tiny string of letters and numbers. This string can be used to link you to the original long URL through this app.
 
 Want to log out and come back later - no problem! Your short URLs will be saved to your account :D (as long as server is still running).
 
-
 #### Usage:
 
 ##### Getting Started
-Install all dependencies. 
+Install all dependencies using `$ npm install`.
 Start server with `$ npm start` from the tinyapp directory in your terminal. You should receive a message in your terminal confirming that the server is running. 
 Navigate to localhost:8080 in your browser, where you will be greeted with a Welcome page and links to register or login. 
 
@@ -44,8 +43,6 @@ Users can only access, edit, and delete shortened URLs that are attributed to th
   * urls_show.ejs
 * tests
   * helpersTest.js (Mocha Chai test for helper functions)
-
-
 
 Enjoy!
 
